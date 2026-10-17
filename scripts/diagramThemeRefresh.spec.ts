@@ -35,6 +35,10 @@ function patchPreviewBlocks(host: HTMLElement, html: string) {
 import { readDiagramSource } from '../src/lib/utils/mermaidPrint.js';
 import { renderRichContent, type RichContentLibraries } from '../src/lib/utils/richContent.js';
 import { resetDiagramCache } from '../src/lib/utils/diagramCache.js';
+// Here, not `await import()` inside the one test that reads source: this pulls in
+// `svelte/compiler`, which takes seconds to load through Vite, and a load inside a
+// test body is charged to that test's timeout.
+import { readSource } from './sourceTree.js';
 
 const SOURCE = 'graph TD;A-->B;';
 
@@ -158,8 +162,7 @@ describe('a pass that is not a theme change', () => {
  * having moved. And it excluded from the re-colour every tab in edit mode,
  * including a split tab entered from edit mode, whose preview is on screen.
  */
-test('the theme effect re-colours in every mode, and does not re-run on a mode change', async () => {
-	const { readSource } = await import('./sourceTree.js');
+test('the theme effect re-colours in every mode, and does not re-run on a mode change', () => {
 	const viewer: string = readSource('src/lib/MarkdownViewer.svelte');
 
 	const effect = viewer.match(
