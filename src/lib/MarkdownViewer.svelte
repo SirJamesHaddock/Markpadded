@@ -19,6 +19,7 @@
 	import Toc from './components/Toc.svelte';
 	import Toast from './components/Toast.svelte';
 	import FindBar from './components/FindBar.svelte';
+	import SelectionTranslate from './components/SelectionTranslate.svelte';
 	import { reviewDirtyTabs } from './sessions/closeReview.js';
 	import { exportAsHtml as _exportHtml, exportAsPdf as _exportPdf } from './utils/export';
 	import { askToOpenExportedFile } from './utils/openExportedFile.js';
@@ -1760,6 +1761,14 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 		if (!previewBlocks || !selection || selection.isCollapsed || !selection.rangeCount) return null;
 		const range = selection.getRangeAt(0);
 		return previewBlocks.contains(range.commonAncestorContainer) ? annotationOf(previewBlocks, range, readRendererLine) : null;
+	}
+
+	/** The selection toolbar's Highlight: the same as the right-click menu's Temporary Highlight. */
+	function highlightSelection() {
+		const selected = selectionAnnotation();
+		if (!selected) return;
+		setAnnotations([...activeAnnotations, selected]);
+		window.getSelection()?.removeAllRanges();
 	}
 
 	function annotationPointAt(e: MouseEvent) {
@@ -4069,6 +4078,12 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 							contentRoot={previewBlocks}
 							onunfold={(key: string) => revealFold(foldHost, key)}
 							language={settings.language} />
+
+						<SelectionTranslate
+							root={previewBlocks}
+							scroller={markdownBody}
+							canHighlight={canAnnotate && settings.previewAnnotations}
+							onhighlight={highlightSelection} />
 
 							<div class="viewer-content">
 								<article
