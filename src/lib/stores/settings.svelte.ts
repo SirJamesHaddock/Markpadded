@@ -473,7 +473,7 @@ export class SettingsStore {
 	previewOccurrences = $state(false);
 	/** Temporary Highlight in the preview's right-click menu; off, the items and the highlights are hidden. */
 	previewAnnotations = $state(false);
-	/** A table wider than the text column grows into the margins (#811). Off, it scrolls inside the column, as on GitHub. */
+	/** A table wider than the text column grows into the margins (#811). Off, it stays in the column. Either way, `previewTableScroll` decides what a table that still does not fit does. */
 	previewTableBreakout = $state(false);
 	/** A table too wide to fit scrolls sideways, as on GitHub. Off, its cells break inside words so it fits. */
 	previewTableScroll = $state(true);

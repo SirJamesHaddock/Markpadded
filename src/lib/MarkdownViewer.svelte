@@ -38,6 +38,7 @@ import {
 } from './utils/richContent.js';
 import { observeFoldLayout, type FoldLayoutObservation } from './utils/foldLayout.js';
 import { patchPreviewBlocks } from './utils/blockPatch.js';
+import { markTablesNeedingFit } from './utils/tableFit.js';
 import {
 	revealFold,
 	toggleFold,
@@ -397,6 +398,8 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 			tocWidth: settings.tocWidth,
 		}),
 	);
+	/** A floating outline sits in the margin, and a table that exceeds the max width stops short of it. */
+	let tocInGutter = $derived(settings.showToc && !settings.pinnedToc && !isOverhanging);
 
 	/**
 	 * Reaching past a floating outline to touch what it is covering is a request
@@ -1702,6 +1705,50 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 		const observer = new ResizeObserver(() => previewLayoutVersion++);
 		observer.observe(host);
 		return () => observer.disconnect();
+	});
+
+	/**
+	 * With Scroll Wide Tables off, only a table too wide for its column is
+	 * squeezed (see ./utils/tableFit.ts). Marked after every patch, in the same
+	 * flush, so a table just re-rendered is never painted unmarked; and when a
+	 * setting changes how much room a table has without resizing anything.
+	 */
+	$effect(() => {
+		const host = previewBlocks;
+		void previewRevision;
+		void settings.previewTableBreakout;
+		void tocInGutter;
+		if (host && !settings.previewTableScroll) markTablesNeedingFit(host);
+	});
+
+	/**
+	 * And again a frame after the document or the article around it resizes: a
+	 * narrower split, the max width, the font size, an image or formula arriving
+	 * in a cell. The article because it fills the pane, and a table that exceeds
+	 * the max width has the margins as well; by its border box because its
+	 * padding is what centres the column, so its content box keeps the column's
+	 * width while the pane changes. A frame later, as the fold heights are:
+	 * marking a table resizes the document, and a resize inside
+	 * ResizeObserver's own delivery is a loop it reports as an error.
+	 */
+	$effect(() => {
+		const host = previewBlocks;
+		const body = markdownBody;
+		if (!host || !body || settings.previewTableScroll) return;
+		let frame: number | null = null;
+		const observer = new ResizeObserver(() => {
+			if (frame !== null) return;
+			frame = requestAnimationFrame(() => {
+				frame = null;
+				markTablesNeedingFit(host);
+			});
+		});
+		observer.observe(host);
+		observer.observe(body, { box: 'border-box' });
+		return () => {
+			observer.disconnect();
+			if (frame !== null) cancelAnimationFrame(frame);
+		};
 	});
 
 	$effect(() => {
@@ -4075,7 +4122,7 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 									bind:this={markdownBody}
 									contenteditable="false"
 									class="markdown-body {settings.previewFullWidth ? 'full-width' : ''}"
-									class:toc-in-gutter={settings.showToc && !settings.pinnedToc && !isOverhanging}
+									class:toc-in-gutter={tocInGutter}
 									class:table-breakout={settings.previewTableBreakout}
 									class:table-fit={!settings.previewTableScroll}
 									onscroll={handleScroll}
@@ -4478,7 +4525,8 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 	/*
 	 * With Wide Tables Can Exceed Max Width on, a table wider than the column
 	 * grows into the margins, centred on the column, up to `--breakout-inset`
-	 * from the pane edge; past that it scrolls.
+	 * from the pane edge; past that, Scroll Wide Tables decides whether it
+	 * scrolls or is squeezed.
 	 * `translate` because only it can use the table's own width: the shift is
 	 * half of what the table exceeds the column by, and 0 for one that fits.
 	 * Nested tables are left out, since their column does not start where the
@@ -4491,11 +4539,13 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 	}
 
 	/*
-	 * With Scroll Wide Tables off, a cell may break inside a word, so the table
-	 * shrinks to fit instead of scrolling. A short column next to a long one
-	 * can then break mid-word too (#927).
+	 * With Scroll Wide Tables off, a table too wide for its column lets its
+	 * cells break inside words, so it shrinks to fit instead of scrolling. Only
+	 * that table, which `markTablesNeedingFit` marks: given to a table that
+	 * already fits, `anywhere` re-divides its columns and breaks the words of a
+	 * short one (#927). In a squeezed table a short column can still break.
 	 */
-	.viewer-content :global(.markdown-body.table-fit table :is(td, th)) {
+	.viewer-content :global(.markdown-body.table-fit table.needs-fit :is(td, th)) {
 		overflow-wrap: anywhere;
 	}
 
