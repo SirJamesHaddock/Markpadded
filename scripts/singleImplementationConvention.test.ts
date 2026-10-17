@@ -95,6 +95,27 @@ const RULES: Rule[] = [
 		allowed: ['src/lib/utils/markdownLinks.ts', 'src/lib/MarkdownViewer.svelte'],
 	},
 	{
+		name: 'whether a tab is a Markdown document is decided in one place',
+		why: "A tab is a Markdown document when it is named with a Markdown-link extension or is untitled, and that answer gates the outline and the title bar's Markdown-only buttons. It was spelled twice, in MarkdownViewer.svelte and titlebarToolbar.ts, and the viewer's copy asked only about the extension — so a document that had never been saved got no outline, while the title bar and the editor's `getLanguage` both treated it as Markdown (#965). `isMarkdownDocument` in markdownLinks.ts is the one spelling now.",
+		// The call, not the empty-path test: the #965 copy had no empty-path
+		// test at all — it was a bare `hasMarkdownLinkExtension(currentFile)` —
+		// so a marker on `=== ''` or `? … : true` would not have seen the very
+		// defect this row is for.
+		//
+		// The allowed callers ask about a name that is never an untitled tab: a
+		// link href (markdownLinks.ts itself, and `isMarkdownDocument` there), a
+		// file being loaded from disk (documentSession.svelte.ts) and a file
+		// dropped on the window (fileDrop.ts). A new caller asking about a name
+		// like those joins the list; one asking about a tab calls
+		// `isMarkdownDocument` instead.
+		marker: /\bhasMarkdownLinkExtension\s*\(/g,
+		allowed: [
+			'src/lib/utils/markdownLinks.ts',
+			'src/lib/sessions/documentSession.svelte.ts',
+			'src/lib/utils/fileDrop.ts',
+		],
+	},
+	{
 		name: 'the list-marker grammar has one implementation in src',
 		why:
 			"\"What a list item's marker looks like\" had three spellings: the Rust renderer's TASK_SOURCE_RE, the preview's checkbox rewrite in documentSession.svelte.ts, and the toolbar's line-marker toggles. The first two agreed; the toolbar's copy accepted neither an indented item nor the `1)` delimiter, so a click on a nested bullet answered `-     - sub` and a click on `1) item` answered `- 1) item` — issue #451 verbatim, one delimiter over. utils/listSyntax.ts holds the vocabulary now. What each site wraps around it — the anchors, the separator, and whether the leading indentation is consumed or preserved — stays at the call site on purpose: the renderer throws that prefix away, the toolbar has to put it back, and sharing *that* would flatten every nested list item on the first click. The Rust copy is pinned against this one by taskToggleLineEndings.test.ts, because no import crosses that boundary.",

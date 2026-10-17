@@ -47,6 +47,18 @@ export function hasMarkdownLinkExtension(path: string): boolean {
 	return MARKDOWN_LINK_EXTENSION_PATTERN.test(path);
 }
 
+/**
+ * Whether the tab whose path is `path` is a Markdown document: one named with a
+ * Markdown-link extension, or an untitled one (`''`), which is Markdown until it
+ * is saved under another name — the editor's `getLanguage` gives it the
+ * Markdown grammar too. The preview's outline and the title-bar toolbar each
+ * used to spell this for themselves, and the outline's copy left out the
+ * untitled case (#965).
+ */
+export function isMarkdownDocument(path: string): boolean {
+	return path === '' || hasMarkdownLinkExtension(path);
+}
+
 function isAbsoluteMarkdownPath(path: string): boolean {
 	return path.startsWith('/') || path.startsWith('\\') || /^[a-z]:/i.test(path);
 }

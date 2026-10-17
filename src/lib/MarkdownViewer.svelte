@@ -87,7 +87,7 @@ import {
 import {
 	anchorIdCandidates,
 	getMarkdownLinkTarget as getRelativeMarkdownTarget,
-	hasMarkdownLinkExtension,
+	isMarkdownDocument,
 	normalizeComparableMarkdownPath,
 	resolveMarkdownTargetPath,
 	type MarkdownLinkTarget as RelativeMarkdownTarget,
@@ -329,8 +329,7 @@ import { createDocumentSession, type LoadMarkdownOptions } from './sessions/docu
 	let frontMatterTagEditIndexes = $state<Record<string, number | null>>({});
 	let frontMatterTagEditDrafts = $state<Record<string, string>>({});
 	let isFrontMatterCollapsed = $derived(frontMatterCollapsedByKey[frontMatterPanelKey] ?? true);
-	// An untitled tab is Markdown until saved under another name; see `getLanguage`.
-	let isMarkdown = $derived(currentFile === '' || hasMarkdownLinkExtension(currentFile));
+	let isMarkdown = $derived(isMarkdownDocument(currentFile));
 	let editorLanguage = $derived(getLanguage(currentFile));
 	let htmlContent = $derived(tabManager.activeTab?.content ?? '');
 	let scrollTop = $derived(tabManager.activeTab?.scrollTop ?? 0);
