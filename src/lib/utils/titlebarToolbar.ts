@@ -1,4 +1,4 @@
-import { hasMarkdownLinkExtension } from './markdownLinks.js';
+import { isMarkdownDocument } from './markdownLinks.js';
 import { applyMove, getAdjacentMove, getReorderMove, type ToolbarMove } from './toolbarMove.js';
 
 export type TitlebarToolbarPlacement = 'bar' | 'menu';
@@ -190,11 +190,8 @@ export function visibleTitlebarActionIds(context: TitlebarActionContext): string
 		if (context.currentFile) list.push('reload');
 
 		// An unsaved buffer has no name to read an extension off, and is
-		// treated as Markdown — which is what the old inline default of `'md'`
-		// said, spelled as the condition it actually is.
-		const isMarkdown = context.currentFile
-			? hasMarkdownLinkExtension(context.currentFile)
-			: true;
+		// treated as Markdown — the same question the preview's outline asks.
+		const isMarkdown = isMarkdownDocument(context.currentFile);
 
 		if (isMarkdown) {
 			list.push('toc');
