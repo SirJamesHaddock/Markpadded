@@ -908,8 +908,6 @@ const PARTIALLY_TRANSLATED: Record<string, number> = {
 	'menu.back': 21,
 	'menu.forward': 21,
 	'menu.window': 23,
-	// Already rendered by the preview settings pane; the panel inherits its gap.
-	'settings.previewMaxWidth': 23,
 };
 
 test('every panel label is translated everywhere, or is a named pre-existing gap', () => {
