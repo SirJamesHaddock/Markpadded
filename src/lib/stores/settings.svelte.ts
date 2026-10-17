@@ -477,6 +477,8 @@ export class SettingsStore {
 	previewTableBreakout = $state(false);
 	/** A table too wide to fit scrolls sideways, as on GitHub. Off, its cells break inside words so it fits. */
 	previewTableScroll = $state(true);
+	/** The language a selection is translated into, as a code from `translate/languages.ts`; the last one picked. */
+	previewTranslateTarget = $state('en');
 	showWhitespace = $state(false);
 	stickyScroll = $state(true);
 	/**
@@ -904,6 +906,7 @@ export function createSettingsPersistence(): PersistedSetting<SettingsStore>[] {
 		booleanSetting('preview.annotations', (s) => s.previewAnnotations, (s, v) => { s.previewAnnotations = v; }),
 		booleanSetting('preview.tableBreakout', (s) => s.previewTableBreakout, (s, v) => { s.previewTableBreakout = v; }),
 		booleanSetting('preview.tableScroll', (s) => s.previewTableScroll, (s, v) => { s.previewTableScroll = v; }),
+		stringSetting('preview.translateTarget', (s) => s.previewTranslateTarget, (s, v) => { s.previewTranslateTarget = v; }),
 		booleanSetting('editor.showWhitespace', (s) => s.showWhitespace, (s, v) => { s.showWhitespace = v; }),
 		booleanSetting('editor.stickyScroll', (s) => s.stickyScroll, (s, v) => { s.stickyScroll = v; }),
 		booleanSetting('editor.splitScrollSync', (s) => s.splitScrollSync, (s, v) => { s.splitScrollSync = v; }),

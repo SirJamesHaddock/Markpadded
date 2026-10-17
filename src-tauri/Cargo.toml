@@ -53,6 +53,12 @@ arboard = { version = "3", features = ["wayland-data-control"] }
 image = { version = "0.25", default-features = false, features = ["png"] }
 chardetng = "1"
 encoding_rs = "0.8"
+# Selection translation (`translate.rs`): language detection, and the
+# zstd-compressed, sha256-checked model files Firefox's offline engine uses.
+# sha2 0.10 is the one already in the lock file through tauri.
+whatlang = "0.18"
+ruzstd = "0.9"
+sha2 = "0.10"
 
 
 
