@@ -2,7 +2,7 @@
 //! command registry.
 
 use crate::window_runtime::{AppState, WatcherState};
-use crate::{asset_protocol, commands, tab_transfer, window_runtime};
+use crate::{asset_protocol, commands, tab_transfer, translate, window_runtime};
 use std::fs;
 use tauri::{Emitter, Manager};
 
@@ -272,7 +272,12 @@ pub fn run() {
             window_runtime::clear_window_state,
             window_runtime::save_restore_progress,
             window_runtime::load_restore_progress,
-            window_runtime::clear_restore_progress
+            window_runtime::clear_restore_progress,
+            translate::detect_language,
+            translate::translate_google,
+            translate::offline_translation_prepare,
+            translate::offline_translation_file,
+            translate::offline_translation_wasm
         ])
         .on_window_event(window_runtime::handle_window_event)
         .on_menu_event(|app, event| {

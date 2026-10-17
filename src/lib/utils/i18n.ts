@@ -117,7 +117,7 @@ const en: Translation = {
         previewTableBreakout: 'Wide Tables Can Exceed Max Width',
         previewTableScroll: 'Scroll Wide Tables',
         previewTableBreakoutHint: 'Spreads into the side margins',
-        previewTableScrollHint: 'On: scroll. Off: squeeze to fit',
+        previewTableScrollHint: 'On: scroll to read closely. Off: squeeze to see it all',
         showTabs: 'Show Tab Bar',
         restoreStateOnReopen: 'Reopen Previous Tabs',
         closeWindowWithLastTab: 'Close Window with Last Tab',

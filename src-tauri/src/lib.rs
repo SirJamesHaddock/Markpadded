@@ -9,6 +9,7 @@ mod fs_safety;
 mod markdown;
 mod semantic;
 mod tab_transfer;
+mod translate;
 mod window_runtime;
 
 pub use app::run;
